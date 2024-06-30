@@ -1,62 +1,38 @@
+import asyncio
 import logging
-from aiogram import Bot, Dispatcher, types
-from aiogram.contrib.middlewares.logging import LoggingMiddleware
-from aiogram.utils import executor
-import os
+import sys
+from os import getenv
+from dotenv import load_dotenv
 
-# Установите уровень логирования
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+from aiogram import Bot, Dispatcher, html
+from aiogram.client.default import DefaultBotProperties
+from aiogram.enums import ParseMode
+from aiogram.filters import CommandStart
+from aiogram.types import Message
 
-# Устанавливаем middleware для логирования
-dp.middleware.setup(LoggingMiddleware())
+load_dotenv()
 
-@dp.message_handler(commands=['start'])
-async def send_welcome(message: types.Message):
-    await message.reply("Привет! Я твой новый бот.")
+# Токен бота можно получить на https://t.me/BotFather
+TOKEN = str(getenv("BOT_TOKEN"))
 
-@dp.message_handler(commands=['help'])
-async def send_help(message: types.Message):
-    await message.reply("Как я могу помочь?")
+# Все обработчики должны быть привязаны к Роутеру (или Диспетчеру)
+dp = Dispatcher()
 
-@dp.message_handler()
-async def echo(message: types.Message):
-    await message.reply(message.text)
+@dp.message(CommandStart())
+async def command_start_handler(message: Message) -> None:
+    await message.answer(f"Привет!\nЭто бот для работы с гифками/демотиваторами.")
 
-def get_token():
-    token_directory = os.path.dirname(os.path.abspath(__file__))
-    token_file_path = os.path.join(token_directory, "TOKEN.txt")
-    if os.path.exists(token_file_path):
-        try:
-            with open(token_file_path, "r") as file:
-                token = file.read().strip()
-                if token:
-                    return token
-                else:
-                    logger.error("Токен не найден в файле TOKEN.txt")
-                    return None
-        except Exception as e:
-            logger.error(f"Ошибка при чтении токена из файла: {e}")
-            return None
-    else:
-        logger.error("Файл TOKEN.txt не найден")
-        TOKEN = input("Введите токен: ")
-        with open(token_file_path, 'w') as file:
-            file.write(TOKEN)
-        return TOKEN
+@dp.message()
+async def echo_handler(message: Message) -> None:
+    await message.answer("Работаем...")
 
-def main():
-    # Получение токена
-    API_TOKEN = get_token()
-    if not API_TOKEN:
-        raise ValueError("Не удалось получить токен для бота")
-    
-    # Создаем объекты бота и диспетчера
-    bot = Bot(token=API_TOKEN)
-    dp = Dispatcher(bot)
+async def main() -> None:
+    # Инициализация экземпляра бота с настройками по умолчанию, которые будут передаваться всем API вызовам
+    bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 
-    # Запуск бота
-    executor.start_polling(dp, skip_updates=True)
+    # Запуск обработки событий
+    await dp.start_polling(bot)
 
-if __name__ == '__main__':
-    main()
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO, stream=sys.stdout)
+    asyncio.run(main())
