@@ -4,14 +4,12 @@ import sys
 from os import getenv
 from dotenv import load_dotenv
 
-from aiogram import Bot, Dispatcher, html, types
+from aiogram import Bot, Dispatcher, types, F, Router
 from aiogram.client.default import DefaultBotProperties
-from aiogram.enums import ParseMode
-from aiogram.filters import CommandStart, Text
+from aiogram.enums import ParseMode, ContentType
+from aiogram.filters import CommandStart
 from aiogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
-from aiogram.types.message import ContentType
 from aiogram.utils.callback_data import CallbackData
-from aiogram import F, Router
 
 load_dotenv()
 
