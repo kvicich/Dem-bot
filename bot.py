@@ -28,7 +28,7 @@ async def echo_handler(message: Message) -> None:
     await message.answer("Работаем...")
 
 # Обработчик для фото, видео и гифок
-@dp.message_handler(content_types=[ContentType.PHOTO, ContentType.VIDEO, ContentType.ANIMATION])
+@dp.message(content_types=[ContentType.PHOTO, ContentType.VIDEO, ContentType.ANIMATION])
 async def media_handler(message: types.Message):
     # Создание инлайн-клавиатуры с кнопками
     keyboard = InlineKeyboardMarkup(row_width=2)
