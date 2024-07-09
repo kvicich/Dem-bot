@@ -48,26 +48,37 @@ async def process_media(message: Message, caption: str) -> None:
     demotivator_text = caption.strip()
 
     if message.content_type == ContentType.PHOTO:
-        photo = await message.photo[-1].download(destination=types.FilePath(f"temp_{message.photo[-1].file_id}.jpg"))
-        demotivator_path = create_demotivator_image(photo.name, demotivator_text)
+        file_info = await bot.get_file(message.photo[-1].file_id)
+        file_path = file_info.file_path
+        downloaded_file = await bot.download_file(file_path)
+        with open(f"temp_{message.photo[-1].file_id}.jpg", 'wb') as new_file:
+            new_file.write(downloaded_file.getvalue())
+        demotivator_path = create_demotivator_image(new_file.name, demotivator_text)
     elif message.content_type == ContentType.VIDEO:
-        video = await message.video.download(destination=types.FilePath(f"temp_{message.video.file_id}.mp4"))
-        demotivator_path = create_demotivator_video(video.name, demotivator_text)
+        file_info = await bot.get_file(message.video.file_id)
+        file_path = file_info.file_path
+        downloaded_file = await bot.download_file(file_path)
+        with open(f"temp_{message.video.file_id}.mp4", 'wb') as new_file:
+            new_file.write(downloaded_file.getvalue())
+        demotivator_path = create_demotivator_video(new_file.name, demotivator_text)
     elif message.content_type == ContentType.ANIMATION:
-        animation = await message.animation.download(destination=types.FilePath(f"temp_{message.animation.file_id}.gif"))
-        demotivator_path = create_demotivator_gif(animation.name, demotivator_text)
+        file_info = await bot.get_file(message.animation.file_id)
+        file_path = file_info.file_path
+        downloaded_file = await bot.download_file(file_path)
+        with open(f"temp_{message.animation.file_id}.gif", 'wb') as new_file:
+            new_file.write(downloaded_file.getvalue())
+        demotivator_path = create_demotivator_gif(new_file.name, demotivator_text)
     
     with open(demotivator_path, 'rb') as demotivator_media:
         await bot.send_document(message.chat.id, demotivator_media)
     
     os.remove(demotivator_path)
     if message.content_type == ContentType.PHOTO:
-        os.remove(photo.name)
+        os.remove(f"temp_{message.photo[-1].file_id}.jpg")
     elif message.content_type == ContentType.VIDEO:
-        os.remove(video.name)
+        os.remove(f"temp_{message.video.file_id}.mp4")
     elif message.content_type == ContentType.ANIMATION:
-        os.remove(animation.name)
-
+        os.remove(f"temp_{message.animation.file_id}.gif")
 
 def create_demotivator_image(image_path, text):
     image = Image.open(image_path)
